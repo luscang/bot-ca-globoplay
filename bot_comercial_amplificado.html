@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bot — Comercial Amplificado Globoplay</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#f5f5f5;padding:16px}
+#app{max-width:700px;margin:0 auto}
+h1{font-size:15px;font-weight:600;color:#1D9E75;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.chat-window{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:12px;min-height:280px;max-height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.msg{max-width:88%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.6}
+.bot{background:#f0f0f0;color:#222;align-self:flex-start;border-radius:4px 14px 14px 14px}
+.user{background:#1D9E75;color:#fff;align-self:flex-end;border-radius:14px 4px 14px 14px}
+.chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{background:#fff;border:1px solid #ccc;border-radius:20px;padding:5px 13px;font-size:13px;cursor:pointer;color:#222}
+.chip:hover{background:#f0faf6;border-color:#1D9E75}
+.ic{display:inline-block;background:#f0f0f0;border:1px solid #ddd;border-radius:10px;padding:3px 9px;font-size:12px;cursor:pointer;color:#333;margin:2px}
+.ic:hover{background:#e0f5ee}
+.input-row{display:flex;gap:8px;margin-bottom:10px}
+.input-row input{flex:1;height:40px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#222;padding:0 12px;font-size:14px;outline:none}
+.input-row input:focus{border-color:#1D9E75}
+.send-btn{height:40px;padding:0 18px;border-radius:8px;background:#1D9E75;color:#fff;border:none;cursor:pointer;font-size:14px;font-weight:500}
+.send-btn:hover{background:#0F6E56}
+.cat-btn{height:40px;padding:0 12px;border-radius:8px;background:#fff;color:#333;border:1px solid #ccc;cursor:pointer;font-size:13px;white-space:nowrap}
+.cat-btn:hover{background:#f0f0f0}
+.btn{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:8px;border:1px solid #ccc;font-size:13px;cursor:pointer;background:#fff;color:#333}
+.btn:hover{background:#f0f0f0}
+.btn.g{background:#1D9E75;color:#fff;border-color:#1D9E75}
+.btn.g:hover{background:#0F6E56}
+.btn.r{background:none;border:none;cursor:pointer;color:#e05555;font-size:14px;padding:3px 7px}
+.arow{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+#catalog{display:none;border:1px solid #ddd;border-radius:12px;background:#fff;overflow:hidden;margin-bottom:10px}
+.cat-header{background:#1D9E75;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.cat-header h2{color:#fff;font-size:15px;font-weight:600;margin:0}
+.cat-header button{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:13px}
+.cat-filters{padding:10px 14px;display:flex;flex-wrap:wrap;gap:6px;border-bottom:1px solid #eee;background:#fafafa}
+.fchip{border:1px solid #ddd;border-radius:20px;padding:4px 12px;font-size:12px;cursor:pointer;color:#333;background:#fff}
+.fchip.active{background:#1D9E75;color:#fff;border-color:#1D9E75}
+.cat-body{padding:14px;max-height:320px;overflow-y:auto}
+.genre-section{margin-bottom:18px}
+.genre-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#888;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.genre-title::after{content:'';flex:1;height:1px;background:#eee}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.pcard{border:1px solid #ddd;border-radius:10px;padding:10px 12px;cursor:pointer;position:relative;background:#fafafa;transition:all .15s}
+.pcard:hover{border-color:#1D9E75;background:#f0faf6}
+.pcard.selected{border-color:#1D9E75;background:#e8f8f2}
+.pcard-check{position:absolute;top:8px;right:8px;width:18px;height:18px;border-radius:50%;border:1.5px solid #ccc;background:#fff;display:flex;align-items:center;justify-content:center;font-size:10px}
+.pcard.selected .pcard-check{background:#1D9E75;border-color:#1D9E75;color:#fff}
+.pcard-nome{font-size:13px;font-weight:500;color:#222;margin-bottom:3px;padding-right:22px;line-height:1.3}
+.pcard-info{font-size:11px;color:#888}
+.pcard-price{font-size:12px;color:#1D9E75;font-weight:600;margin-top:4px}
+.cat-footer{padding:12px 14px;border-top:1px solid #eee;background:#fafafa;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.sel-count{font-size:13px;color:#666}
+#cfg-panel{display:none;border:1px solid #ddd;border-radius:12px;background:#fff;overflow:hidden;margin-bottom:10px}
+.cfg-header{background:#1D9E75;padding:10px 16px;display:flex;justify-content:space-between;align-items:center}
+.cfg-header h2{color:#fff;font-size:14px;margin:0}
+.cfg-body{padding:12px 14px;max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.cfg-row{background:#fafafa;border:1px solid #eee;border-radius:8px;padding:10px 12px}
+.cfg-row-title{font-size:13px;font-weight:500;margin-bottom:6px;color:#222}
+.cfg-row-sub{font-size:11px;color:#888;margin-bottom:6px}
+.cfg-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.cfg-controls label{font-size:11px;color:#888;display:flex;flex-direction:column;gap:3px}
+.cfg-controls select{padding:4px 8px;border-radius:6px;border:1px solid #ccc;background:#fff;color:#222;font-size:13px}
+.cfg-footer{padding:12px 14px;border-top:1px solid #eee;background:#fafafa;display:flex;justify-content:flex-end;gap:8px}
+.hist-bar{cursor:pointer;font-size:12px;color:#888;margin-top:10px;display:flex;align-items:center;gap:6px;border-top:1px solid #eee;padding-top:10px;user-select:none}
+.hist-panel{display:none;flex-direction:column;gap:6px;margin-top:8px}
+.hi{background:#fafafa;border:1px solid #eee;border-radius:8px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.hi-info{flex:1}
+.hi-actions{display:flex;gap:5px}
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>🎬 Comercial Amplificado Globoplay</h1>
+  <div class="chat-window" id="chat"></div>
+  <div class="input-row">
+    <input id="txt" placeholder="Digite sua resposta..." onkeydown="if(event.key==='Enter')send()"/>
+    <button class="cat-btn" onclick="openCatalog()">📺 Catálogo</button>
+    <button class="send-btn" onclick="send()">Enviar</button>
+  </div>
+
+  <div id="catalog">
+    <div class="cat-header">
+      <h2>📺 Catálogo de Programas</h2>
+      <button onclick="closeCatalog()">✕ Fechar</button>
+    </div>
+    <div class="cat-filters" id="cat-filters"></div>
+    <div class="cat-body" id="cat-body"></div>
+    <div class="cat-footer">
+      <span class="sel-count" id="sel-count">Nenhum programa selecionado</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="clearSel()">Limpar</button>
+        <button class="btn g" id="conf-sel-btn" onclick="openCfgPanel()" disabled style="opacity:.5">Configurar →</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="cfg-panel">
+    <div class="cfg-header">
+      <h2>⚙️ Configurar inserções</h2>
+      <button style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:4px 10px;cursor:pointer" onclick="backToCatalog()">← Voltar</button>
+    </div>
+    <div class="cfg-body" id="cfg-body"></div>
+    <div class="cfg-footer">
+      <button class="btn" onclick="closeCatalog()">Cancelar</button>
+      <button class="btn g" onclick="addFromCatalog()">✔ Adicionar à proposta</button>
+    </div>
+  </div>
+
+  <div class="hist-bar" onclick="toggleHist()">
+    <span>📋</span><span id="hlabel">Histórico de propostas (0)</span><span id="harrow">▾</span>
+  </div>
+  <div id="hpanel" class="hist-panel"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const PG=[
+  {cod:"ALTA",nome:"Altas Horas",genero:"Auditório",dia:"Sáb",hora:"22:30",ca:10925},
+  {cod:"AUTO",nome:"Auto Esporte",genero:"Carros e Motores",dia:"Dom",hora:"08:05",ca:5460},
+  {cod:"BIAL",nome:"Conversa com Bial",genero:"Entrevista",dia:"Seg/Sex",hora:"-",ca:3945},
+  {cod:"BIGB",nome:"Big Brother Brasil",genero:"Reality Show",dia:"-",hora:"-",ca:19732.8},
+  {cod:"BIGF",nome:"BBB — Final",genero:"Reality Show",dia:"-",hora:"-",ca:46108.8},
+  {cod:"BOMS",nome:"Bom Dia Sábado",genero:"Jornalismo",dia:"Sáb",hora:"06:50",ca:3970},
+  {cod:"BPRA",nome:"Bom Dia Praça",genero:"Jornalismo",dia:"Seg/Sex",hora:"06:00",ca:6315},
+  {cod:"BSER",nome:"Viver Sertanejo",genero:"Entrevista",dia:"Dom",hora:"10:15",ca:8125},
+  {cod:"CALD",nome:"Caldeirão Com Mion",genero:"Auditório",dia:"Sáb",hora:"16:15",ca:8985},
+  {cod:"CASA",nome:"É De Casa",genero:"Variedades",dia:"Sáb",hora:"08:30",ca:5760},
+  {cod:"CBIL",nome:"Campeões de Bilheteria",genero:"Filme",dia:"Dom",hora:"-",ca:7055},
+  {cod:"CHEF",nome:"Chef de Alto Nível",genero:"Reality Show",dia:"Ter/Qui",hora:"22:25",ca:20690},
+  {cod:"CIMA",nome:"Cinemaço",genero:"Filme",dia:"Dom",hora:"03:05",ca:2410},
+  {cod:"CINE",nome:"Cinema Especial",genero:"Filme",dia:"Qua",hora:"-",ca:11185},
+  {cod:"COR1",nome:"Corujão",genero:"Filme",dia:"Seg/Dom",hora:"03:00",ca:1870},
+  {cod:"CSER",nome:"Circuito Sertanejo",genero:"Show",dia:"-",hora:"-",ca:6165},
+  {cod:"DOM1",nome:"Domingão com Huck (P1)",genero:"Auditório",dia:"Dom",hora:"-",ca:8330},
+  {cod:"DOMA",nome:"Domingo Maior",genero:"Filme",dia:"Dom",hora:"01:20",ca:3900},
+  {cod:"DOMI",nome:"Domingão Com Huck",genero:"Auditório",dia:"Dom",hora:"17:30",ca:16205},
+  {cod:"EMPR",nome:"Pequenas Empresas Grandes Negócios",genero:"Reportagem",dia:"Sáb",hora:"07:50",ca:4080},
+  {cod:"ENCT",nome:"Encontro Com Patrícia Poeta",genero:"Variedades",dia:"Seg/Sex",hora:"09:30",ca:6900},
+  {cod:"ESPO",nome:"Esporte Espetacular",genero:"Esporte",dia:"Dom",hora:"11:10",ca:7860},
+  {cod:"FANT",nome:"Fantástico",genero:"Reportagem",dia:"Dom",hora:"20:30",ca:21005},
+  {cod:"GESP",nome:"Globo Esporte",genero:"Esporte",dia:"Seg/Sáb",hora:"13:00",ca:11460},
+  {cod:"GREP",nome:"Globo Repórter (Dom)",genero:"Reportagem",dia:"Dom",hora:"06:45",ca:3370},
+  {cod:"GRUD",nome:"Globo Rural",genero:"Jornalismo",dia:"Dom",hora:"08:40",ca:4745},
+  {cod:"GRUR",nome:"Globo Rural Reprise",genero:"Reportagem",dia:"Sáb",hora:"06:00",ca:2210},
+  {cod:"HORA",nome:"Hora Um",genero:"Jornalismo",dia:"Seg/Sex",hora:"04:00",ca:2530},
+  {cod:"JGLO",nome:"Jornal Da Globo",genero:"Jornalismo",dia:"Seg/Sex",hora:"01:15",ca:5175},
+  {cod:"JHOJ",nome:"Jornal Hoje",genero:"Jornalismo",dia:"Seg/Sex",hora:"13:25",ca:11460},
+  {cod:"JNAC",nome:"Jornal Nacional",genero:"Jornalismo",dia:"Seg/Sex",hora:"20:30",ca:19060},
+  {cod:"JNAS",nome:"Jornal Nacional (Sáb)",genero:"Jornalismo",dia:"Sáb",hora:"20:30",ca:15855},
+  {cod:"MAVO",nome:"Mais Você",genero:"Variedades",dia:"Seg/Sex",hora:"10:35",ca:7470},
+  {cod:"MINI",nome:"Minissérie 2",genero:"Série",dia:"Seg/Sex",hora:"-",ca:7725},
+  {cod:"MINS",nome:"Minissérie 1",genero:"Série",dia:"Seg/Sex",hora:"-",ca:13325},
+  {cod:"N15H",nome:"Novela da Tarde",genero:"Novela",dia:"Seg/Sáb",hora:"14:45",ca:11405},
+  {cod:"N18H",nome:"Novela I",genero:"Novela",dia:"Seg/Sex",hora:"18:25",ca:18930},
+  {cod:"N18S",nome:"Novela I (Sáb)",genero:"Novela",dia:"Sáb",hora:"18:40",ca:15860},
+  {cod:"N19H",nome:"Novela II",genero:"Novela",dia:"Seg/Sex",hora:"19:40",ca:22765},
+  {cod:"N19S",nome:"Novela II (Sáb)",genero:"Novela",dia:"Sáb",hora:"19:45",ca:18530},
+  {cod:"N20H",nome:"Novela III",genero:"Novela",dia:"Seg/Sex",hora:"21:20",ca:27315},
+  {cod:"N20S",nome:"Novela III (Sáb)",genero:"Novela",dia:"Sáb",hora:"21:20",ca:22755},
+  {cod:"NBRA",nome:"Bom Dia Brasil",genero:"Jornalismo",dia:"Seg/Sex",hora:"08:30",ca:7935},
+  {cod:"NOVR",nome:"Rebatida de Novela",genero:"Novela",dia:"Seg/Sáb",hora:"02:05",ca:2530},
+  {cod:"PROF",nome:"Profissão Repórter",genero:"Reportagem",dia:"Ter",hora:"00:00",ca:8725},
+  {cod:"PT2S",nome:"Praça TV 2ª Ed. (Sáb)",genero:"Jornalismo",dia:"Sáb",hora:"19:25",ca:16335},
+  {cod:"PTV1",nome:"Praça TV 1ª Edição",genero:"Jornalismo",dia:"Seg/Sáb",hora:"11:45",ca:10240},
+  {cod:"PTV2",nome:"Praça TV 2ª Ed. (Seg/Sex)",genero:"Jornalismo",dia:"Seg/Sex",hora:"19:10",ca:19355},
+  {cod:"REPO",nome:"Globo Repórter (Sex)",genero:"Reportagem",dia:"Sex",hora:"22:35",ca:14885},
+  {cod:"SHO2",nome:"Show de Segunda-Feira",genero:"Entretenimento",dia:"Seg",hora:"-",ca:12000},
+  {cod:"SHO4",nome:"Show de Quarta-feira II",genero:"Entretenimento",dia:"Qua",hora:"-",ca:5705},
+  {cod:"SHO5",nome:"Show de Quinta-feira II",genero:"Entrevista",dia:"Qui",hora:"23:40",ca:9710},
+  {cod:"SHOD",nome:"Show de Domingo Noturno",genero:"Entretenimento",dia:"Dom",hora:"-",ca:8655},
+  {cod:"SHQ1",nome:"Show de Quinta-feira I",genero:"Entretenimento",dia:"Qui",hora:"-",ca:12980},
+  {cod:"SHT1",nome:"Show de Terça-feira I",genero:"Entretenimento",dia:"Ter",hora:"-",ca:17150},
+  {cod:"SOMB",nome:"Som Brasil",genero:"Musical",dia:"Seg/Dom",hora:"-",ca:6540},
+  {cod:"SSUP",nome:"Show de Sexta-Feira II",genero:"Série",dia:"Sex",hora:"23:15",ca:10800},
+  {cod:"SUCI",nome:"Supercine",genero:"Filme",dia:"Sáb",hora:"01:00",ca:3450},
+  {cod:"TARA",nome:"Sessão da Tarde",genero:"Filme",dia:"Seg/Sex",hora:"15:25",ca:9480},
+  {cod:"TELA",nome:"Tela Quente",genero:"Filme",dia:"Seg",hora:"23:30",ca:11885},
+  {cod:"THIS",nome:"This Is Us",genero:"Série",dia:"Qui",hora:"23:45",ca:9335},
+  {cod:"TMAX",nome:"Temperatura Máxima",genero:"Filme",dia:"Dom",hora:"13:55",ca:8255},
+  {cod:"TNOB",nome:"Show de Terça-feira II",genero:"Entretenimento",dia:"Ter",hora:"-",ca:9900},
+  {cod:"TOWN",nome:"The Town",genero:"Show",dia:"-",hora:"-",ca:5745},
+  {cod:"TRIB",nome:"Tributos",genero:"Musical",dia:"Seg/Dom",hora:"-",ca:7235},
+  {cod:"VALE",nome:"Vale A Pena Ver De Novo",genero:"Novela",dia:"Seg/Sex",hora:"17:05",ca:13550},
+];
+
+const COEF={6:.4,10:.45,15:.75,30:1,45:1.5,60:2};
+const GORDER=['Novela','Jornalismo','Entretenimento','Auditório','Reportagem','Reality Show','Variedades','Filme','Esporte','Série','Musical','Entrevista','Show','Carros e Motores','Outros'];
+
+function getMult(n){if(n<=1)return 1;if(n<=2)return 1.05;if(n<=3)return 1.08;if(n<=4)return 1.1;if(n<=5)return 1.12;if(n<=7)return 1.15;if(n<=9)return 1.17;if(n<=12)return 1.2;if(n<=15)return 1.22;if(n<=20)return 1.25;if(n<=25)return 1.27;if(n<=30)return 1.3;return 1.35;}
+const fmt=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:2});
+
+let S={step:'executivo',exec:'',anun:'',periodo:'',ins:[],desc:0,pgm:null,qtd:1,dur:30};
+let proposals=[],reviewDiv=null,histOpen=false,catSel=new Set(),catFilter='Todos';
+const chat=document.getElementById('chat'),txt=document.getElementById('txt');
+
+function addMsg(html,t='bot'){const d=document.createElement('div');d.className='msg '+t;d.innerHTML=html;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;return d;}
+function addChips(opts,cb){const r=document.createElement('div');r.className='chip-row';opts.forEach(o=>{const c=document.createElement('button');c.className='chip';c.textContent=o;c.onclick=()=>{r.remove();cb(o);};r.appendChild(c);});chat.appendChild(r);chat.scrollTop=chat.scrollHeight;}
+function send(){const v=txt.value.trim();if(!v)return;txt.value='';addMsg(v,'user');processInput(v);}
+
+function processInput(v){
+  if(S.step==='executivo'){S.exec=v;S.step='anun';addMsg(`Olá, <strong>${v}</strong>! 👋 Qual o nome do anunciante?`);}
+  else if(S.step==='anun'){S.anun=v;S.step='periodo';addMsg('Qual o período das inserções? <span style="font-size:12px;color:#888">(ex: Maio/2025, semana de 05/05...)</span>');}
+  else if(S.step==='periodo'){S.periodo=v;askPgm();}
+  else if(S.step==='pgm_busca'){
+    const q=v.toLowerCase(),res=PG.filter(p=>p.nome.toLowerCase().includes(q)||p.cod.toLowerCase().includes(q)).slice(0,8);
+    if(!res.length){addMsg('Nenhum programa encontrado. Tente outro nome ou código.');return;}
+    addMsg(`${res.length} resultado(s):`);showPgmChips(res);
+  }
+  else if(S.step==='desc_custom'){
+    const d=parseFloat(v.replace(',','.'));
+    if(isNaN(d)||d<0||d>100){addMsg('Valor inválido. Digite entre 0 e 100.');return;}
+    S.desc=d;gerarProposta();
+  }
+}
+
+function askPgm(){
+  const gens=[...new Set(PG.map(p=>p.genero))].filter(g=>g&&g!=='-').sort();
+  const gc=gens.map(g=>`<span class="ic" onclick="fGenero('${g}')">${g}</span>`).join('');
+  const dc=['Seg/Sex','Sáb','Dom'].map(d=>`<span class="ic" onclick="fDia('${d}')">${d}</span>`).join('');
+  addMsg(`Qual programa deseja incluir?<br><br><span style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.4px">Por gênero</span><br>${gc}<br><br><span style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.4px">Por dia</span><br>${dc}<br><br><span style="font-size:12px;color:#888">Ou clique em <strong>📺 Catálogo</strong> para ver todos, ou digite o nome/código.</span>`);
+  S.step='pgm_busca';
+}
+
+window.fGenero=g=>{addMsg(`Gênero: <strong>${g}</strong>`,'user');const r=PG.filter(p=>p.genero===g);addMsg(`${r.length} programa(s) em <strong>${g}</strong>:`);showPgmChips(r);};
+window.fDia=d=>{addMsg(`Dia: <strong>${d}</strong>`,'user');const r=PG.filter(p=>p.dia.includes(d.split('/')[0]));addMsg(`${r.length} programa(s):`);showPgmChips(r.slice(0,10));};
+function showPgmChips(res){addChips(res.map(p=>`${p.nome} (${p.dia})`),e=>{const pgm=res.find(p=>`${p.nome} (${p.dia})`===e);selectPgm(pgm);});}
+
+function selectPgm(pgm){
+  S.pgm=pgm;S.step='qtd';
+  addMsg(`<strong>${pgm.nome}</strong> — ${pgm.dia}${pgm.hora&&pgm.hora!=='-'?' · '+pgm.hora:''}<br>Quantas inserções?`);
+  addChips(['1','2','3','4','5','7','10'],e2=>{
+    S.qtd=parseInt(e2);S.step='dur';
+    addMsg('Qual a duração?');
+    addChips(['6"','10"','15"','30"','45"','60"'],e3=>{S.dur=parseInt(e3);confirmar();});
+  });
+}
+
+function confirmar(){
+  const p=S.pgm,pu=p.ca*(COEF[S.dur]||1),total=pu*S.qtd*getMult(S.qtd);
+  S.ins.push({pgm:p,qtd:S.qtd,dur:S.dur,pu,total});
+  addMsg(`✔ <strong>${p.nome}</strong> — ${S.qtd}× ${S.dur}" → <strong>${fmt(total)}</strong><br><br>Deseja adicionar outro programa?`);
+  addChips(['Sim, adicionar mais','Revisar e fechar proposta'],e=>{if(e.startsWith('Sim'))askPgm();else showReview();});
+}
+
+// CATÁLOGO
+function openCatalog(){
+  if(['executivo','anun','periodo'].includes(S.step)){addMsg('⚠️ Complete nome, anunciante e período antes de acessar o catálogo.');return;}
+  catSel=new Set();buildCatalog();
+  document.getElementById('catalog').style.display='block';
+  document.getElementById('cfg-panel').style.display='none';
+  document.getElementById('catalog').scrollIntoView({behavior:'smooth',block:'start'});
+  S.step='pgm_busca';
+}
+function closeCatalog(){document.getElementById('catalog').style.display='none';document.getElementById('cfg-panel').style.display='none';}
+function backToCatalog(){document.getElementById('cfg-panel').style.display='none';document.getElementById('catalog').style.display='block';}
+
+function buildCatalog(){
+  const gens=['Todos',...new Set(PG.map(p=>p.genero).filter(g=>g&&g!=='-').sort())];
+  document.getElementById('cat-filters').innerHTML=gens.map(g=>`<button class="fchip${g===catFilter?' active':''}" onclick="setFilter('${g}')">${g}</button>`).join('');
+  renderCards();
+}
+window.setFilter=g=>{catFilter=g;buildCatalog();};
+
+function renderCards(){
+  const body=document.getElementById('cat-body');body.innerHTML='';
+  const list=catFilter==='Todos'?PG:PG.filter(p=>p.genero===catFilter);
+  const byG={};list.forEach(p=>{const g=p.genero&&p.genero!=='-'?p.genero:'Outros';if(!byG[g])byG[g]=[];byG[g].push(p);});
+  const order=[...GORDER.filter(g=>byG[g]),...Object.keys(byG).filter(g=>!GORDER.includes(g))];
+  order.forEach(g=>{
+    if(!byG[g])return;
+    const sec=document.createElement('div');sec.className='genre-section';
+    sec.innerHTML=`<div class="genre-title">${g}</div><div class="cards-grid" id="g-${g.replace(/\W/g,'_')}"></div>`;
+    body.appendChild(sec);
+    byG[g].forEach(p=>{
+      const c=document.createElement('div');c.className='pcard'+(catSel.has(p.cod)?' selected':'');c.id='card-'+p.cod;
+      c.innerHTML=`<div class="pcard-check">${catSel.has(p.cod)?'✓':''}</div><div class="pcard-nome">${p.nome}</div><div class="pcard-info">${p.dia}${p.hora&&p.hora!=='-'?' · '+p.hora:''}</div><div class="pcard-price">${fmt(p.ca)} <span style="font-weight:400;font-size:10px;color:#aaa">/ 30"</span></div>`;
+      c.onclick=()=>toggleCard(p.cod);
+      sec.querySelector('.cards-grid').appendChild(c);
+    });
+  });
+  updateSelCount();
+}
+
+function toggleCard(cod){
+  catSel.has(cod)?catSel.delete(cod):catSel.add(cod);
+  const c=document.getElementById('card-'+cod);
+  if(c){c.classList.toggle('selected',catSel.has(cod));c.querySelector('.pcard-check').textContent=catSel.has(cod)?'✓':'';}
+  updateSelCount();
+}
+function updateSelCount(){
+  const n=catSel.size,btn=document.getElementById('conf-sel-btn');
+  document.getElementById('sel-count').textContent=n===0?'Nenhum programa selecionado':`${n} programa(s) selecionado(s)`;
+  btn.disabled=n===0;btn.style.opacity=n?'1':'.5';
+}
+window.clearSel=()=>{catSel=new Set();renderCards();};
+
+function openCfgPanel(){
+  if(!catSel.size)return;
+  document.getElementById('catalog').style.display='none';
+  document.getElementById('cfg-panel').style.display='block';
+  const body=document.getElementById('cfg-body');body.innerHTML='';
+  catSel.forEach(cod=>{
+    const p=PG.find(x=>x.cod===cod);if(!p)return;
+    const row=document.createElement('div');row.className='cfg-row';
+    row.innerHTML=`<div class="cfg-row-title">${p.nome}</div>
+      <div class="cfg-row-sub">${p.dia}${p.hora&&p.hora!=='-'?' · '+p.hora:''} · Base 30": ${fmt(p.ca)}</div>
+      <div class="cfg-controls">
+        <label>Qtd inserções<select id="qtd-${cod}">${[1,2,3,4,5,7,10].map(n=>`<option value="${n}"${n===1?' selected':''}>${n}</option>`).join('')}</select></label>
+        <label>Duração<select id="dur-${cod}">${[6,10,15,30,45,60].map(d=>`<option value="${d}"${d===30?' selected':''}>${d}"</option>`).join('')}</select></label>
+        <label style="flex:1;align-items:flex-end">Valor<span id="prev-${cod}" style="font-size:13px;font-weight:600;color:#1D9E75">${fmt(p.ca)}</span></label>
+      </div>`;
+    body.appendChild(row);
+    const upd=()=>{const q=+row.querySelector(`#qtd-${cod}`).value,d=+row.querySelector(`#dur-${cod}`).value;row.querySelector(`#prev-${cod}`).textContent=fmt(p.ca*(COEF[d]||1)*q*getMult(q));};
+    row.querySelector(`#qtd-${cod}`).onchange=upd;row.querySelector(`#dur-${cod}`).onchange=upd;
+  });
+  document.getElementById('cfg-panel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function addFromCatalog(){
+  let n=0;
+  catSel.forEach(cod=>{
+    const p=PG.find(x=>x.cod===cod);if(!p)return;
+    const qtd=+document.getElementById(`qtd-${cod}`).value,dur=+document.getElementById(`dur-${cod}`).value;
+    const pu=p.ca*(COEF[dur]||1),total=pu*qtd*getMult(qtd);
+    S.ins.push({pgm:p,qtd,dur,pu,total});n++;
+  });
+  closeCatalog();catSel=new Set();
+  addMsg(`✔ <strong>${n} programa(s)</strong> adicionado(s)!<br><br>Deseja adicionar mais ou fechar?`);
+  addChips(['Adicionar mais programas','Revisar e fechar proposta'],e=>{if(e.startsWith('Adicionar'))askPgm();else showReview();});
+}
+
+// REVIEW
+function buildReviewHTML(){
+  if(!S.ins.length)return '⚠️ Nenhuma inserção adicionada.';
+  const rows=S.ins.map((i,idx)=>`<tr><td style="padding:5px 6px;border-bottom:1px solid #eee">${i.pgm.nome}</td><td style="padding:5px 6px;border-bottom:1px solid #eee;text-align:center">${i.pgm.dia}</td><td style="padding:5px 6px;border-bottom:1px solid #eee;text-align:center">${i.qtd}× ${i.dur}"</td><td style="padding:5px 6px;border-bottom:1px solid #eee;text-align:right">${fmt(i.total)}</td><td style="padding:5px 6px;border-bottom:1px solid #eee;text-align:center"><button class="btn r" onclick="rmItem(${idx})">✕</button></td></tr>`).join('');
+  const sub=S.ins.reduce((s,i)=>s+i.total,0);
+  return `<strong>Revisão das inserções</strong><table style="width:100%;border-collapse:collapse;margin:8px 0;font-size:13px"><tr style="font-size:11px;color:#888"><th style="padding:4px 6px;text-align:left">Programa</th><th style="padding:4px 6px">Dia</th><th style="padding:4px 6px">Qtd/Dur</th><th style="padding:4px 6px;text-align:right">Total</th><th></th></tr>${rows}<tr><td colspan="3" style="padding:6px;font-size:12px;color:#888">Subtotal</td><td style="padding:6px;font-weight:600;text-align:right">${fmt(sub)}</td><td></td></tr></table><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px"><button class="btn" onclick="maisP()">+ Via chat</button><button class="btn" onclick="maisC()">📺 Via catálogo</button><button class="btn g" onclick="confReview()">Confirmar →</button></div>`;
+}
+function showReview(){if(reviewDiv)reviewDiv.remove();reviewDiv=addMsg(buildReviewHTML());}
+window.rmItem=idx=>{S.ins.splice(idx,1);if(reviewDiv)reviewDiv.innerHTML=buildReviewHTML();chat.scrollTop=chat.scrollHeight;};
+window.maisP=()=>{if(reviewDiv){reviewDiv.remove();reviewDiv=null;}askPgm();};
+window.maisC=()=>{if(reviewDiv){reviewDiv.remove();reviewDiv=null;}openCatalog();};
+window.confReview=()=>{
+  if(reviewDiv){reviewDiv.remove();reviewDiv=null;}
+  addMsg('Deseja aplicar desconto comercial?');
+  addChips(['Sem desconto','5%','10%','15%','20%','Personalizado'],e=>{
+    if(e==='Sem desconto'){S.desc=0;gerarProposta();}
+    else if(e==='Personalizado'){S.step='desc_custom';addMsg('Digite o percentual (ex: 12):');}
+    else{S.desc=parseInt(e);gerarProposta();}
+  });
+};
+
+// PROPOSTA
+function gerarProposta(){
+  const sub=S.ins.reduce((s,i)=>s+i.total,0),dv=sub*(S.desc/100),tot=sub-dv;
+  const byG={};S.ins.forEach(i=>{const g=i.pgm.genero&&i.pgm.genero!=='-'?i.pgm.genero:'Outros';byG[g]=(byG[g]||0)+i.total;});
+  const gRows=Object.entries(byG).sort((a,b)=>b[1]-a[1]).map((e,i)=>`<tr style="background:${i%2===0?'transparent':'#f9f9f9'}"><td style="padding:4px 8px">${e[0]}</td><td style="padding:4px 8px;text-align:right">${fmt(e[1])}</td><td style="padding:4px 8px;text-align:right">${((e[1]/sub)*100).toFixed(1)}%</td></tr>`).join('');
+  const iRows=S.ins.map(i=>`<tr><td style="padding:5px 6px;border-bottom:1px solid #eee">${i.pgm.nome}</td><td style="padding:5px 6px;border-bottom:1px solid #eee;text-align:center">${i.pgm.dia}</td><td style="padding:5px 6px;border-bottom:1px solid #eee;text-align:center">${i.qtd}</td><td style="padding:5px 6px;border-bottom:1px solid #eee;text-align:center">${i.dur}"</td><td style="padding:5px 6px;border-bottom:1px solid #eee;text-align:right">${fmt(i.pu)}</td><td style="padding:5px 6px;border-bottom:1px solid #eee;text-align:right">${fmt(i.total)}</td></tr>`).join('');
+  const dRow=S.desc>0?`<tr><td colspan="5" style="padding:5px 6px;color:#888">Desconto (${S.desc}%)</td><td style="padding:5px 6px;text-align:right;color:#e05555">-${fmt(dv)}</td></tr>`:'';
+  addMsg(`<div style="font-size:14px;margin-bottom:8px"><strong>Proposta — Comercial Amplificado Globoplay</strong><br><span style="font-size:12px;color:#888">${S.anun} · ${S.periodo} · ${new Date().toLocaleDateString('pt-BR')}</span></div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:8px"><tr style="font-size:11px;color:#888"><th style="padding:4px 6px;text-align:left">Programa</th><th style="padding:4px 6px;text-align:center">Dia</th><th style="padding:4px 6px;text-align:center">Qtd</th><th style="padding:4px 6px;text-align:center">Dur.</th><th style="padding:4px 6px;text-align:right">Unit.</th><th style="padding:4px 6px;text-align:right">Total</th></tr>${iRows}${dRow}<tr style="background:#f0faf6"><td colspan="5" style="padding:6px;font-weight:600">Total${S.desc>0?' com desconto':''}</td><td style="padding:6px;font-weight:600;text-align:right">${fmt(tot)}</td></tr></table>
+    <details style="margin-bottom:10px"><summary style="font-size:12px;cursor:pointer;color:#888">📊 Resumo por gênero ▾</summary><table style="width:100%;border-collapse:collapse;margin-top:6px;font-size:12px"><tr style="font-size:11px;color:#888"><th style="padding:3px 8px;text-align:left">Gênero</th><th style="padding:3px 8px;text-align:right">Total</th><th style="padding:3px 8px;text-align:right">Mix</th></tr>${gRows}</table></details>
+    <div class="arow">
+      <button class="btn g" onclick="exportPDF()">⬇ PDF</button>
+      <button class="btn g" onclick="exportExcel()">⬇ Excel</button>
+      <button class="btn" onclick="copyTxt()">📋 Copiar</button>
+      <button class="btn" onclick="openDoc('apres')">📄 Narrativa</button>
+      <button class="btn" onclick="openDoc('qa')">❓ Q&A</button>
+      <button class="btn" onclick="resetBot()">↺ Nova proposta</button>
+    </div>`);
+  proposals.unshift({exec:S.exec,anun:S.anun,periodo:S.periodo,ins:[...S.ins],desc:S.desc,tot,data:new Date().toLocaleDateString('pt-BR')});
+  renderHist();
+}
+
+window.openDoc=t=>{
+  const L={
+    apres:'https://tvglobocorp-my.sharepoint.com/:f:/r/personal/storagesalesexcellence_g_globo/Documents/Produtos%20-%20Externo/a_Apoio%20a%20Vendas/Narrativas/Narrativas%20Comerciais/Comercial%20Amplificado/Narrativa?csf=1&web=1&e=iCbpIh',
+    qa:'https://tvglobocorp-my.sharepoint.com/:f:/r/personal/storagesalesexcellence_g_globo/Documents/Produtos%20-%20Externo/a_Apoio%20a%20Vendas/Narrativas/Narrativas%20Comerciais/Comercial%20Amplificado/Q%26A?csf=1&web=1&e=lxdrpw'
+  };
+  window.open(L[t],'_blank');
+  addMsg(`📎 <strong>${t==='apres'?'Narrativa Comercial':'Q&A Comercial Amplificado'}</strong> aberto.`);
+};
+
+window.copyTxt=p=>{
+  const ins=p?p.ins:S.ins,desc=p?p.desc:S.desc,anun=p?p.anun:S.anun,exec=p?p.exec:S.exec,periodo=p?p.periodo:S.periodo,data=p?p.data:new Date().toLocaleDateString('pt-BR');
+  const sub=ins.reduce((s,i)=>s+i.total,0),dv=sub*(desc/100),tot=sub-dv;
+  const t=['PROPOSTA — COMERCIAL AMPLIFICADO GLOBOPLAY','━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',`Anunciante: ${anun}  |  Período: ${periodo}  |  Data: ${data}`,`Executivo: ${exec}`,'','INSERÇÕES:',...ins.map(i=>`• ${i.pgm.nome} (${i.pgm.dia}) | ${i.qtd}× ${i.dur}" | ${fmt(i.total)}`),'',...(desc>0?[`Subtotal: ${fmt(sub)}`,`Desconto (${desc}%): -${fmt(dv)}`]:[]),`TOTAL: ${fmt(tot)}`].join('\n');
+  navigator.clipboard.writeText(t).then(()=>addMsg('✅ Copiado!')).catch(()=>addMsg('⚠️ Não foi possível copiar.'));
+};
+
+function buildPDF(p){
+  const ins=p?p.ins:S.ins,desc=p?p.desc:S.desc,anun=p?p.anun:S.anun,exec=p?p.exec:S.exec,periodo=p?p.periodo:S.periodo,data=p?p.data:new Date().toLocaleDateString('pt-BR');
+  const sub=ins.reduce((s,i)=>s+i.total,0),dv=sub*(desc/100),tot=sub-dv;
+  const byG={};ins.forEach(i=>{const g=i.pgm.genero&&i.pgm.genero!=='-'?i.pgm.genero:'Outros';byG[g]=(byG[g]||0)+i.total;});
+  const gR=Object.entries(byG).sort((a,b)=>b[1]-a[1]).map(([g,v],i)=>`<tr style="background:${i%2===0?'#fff':'#f9f9f9'}"><td style="padding:6px 10px">${g}</td><td style="padding:6px 10px;text-align:right">${fmt(v)}</td><td style="padding:6px 10px;text-align:right">${((v/sub)*100).toFixed(1)}%</td></tr>`).join('');
+  const iR=ins.map((i,idx)=>`<tr style="background:${idx%2===0?'#fff':'#f9f9f9'}"><td style="padding:7px 10px;border-bottom:1px solid #eee">${i.pgm.nome}</td><td style="padding:7px 10px;border-bottom:1px solid #eee;text-align:center">${i.pgm.dia}</td><td style="padding:7px 10px;border-bottom:1px solid #eee">${i.pgm.genero}</td><td style="padding:7px 10px;border-bottom:1px solid #eee;text-align:center">${i.qtd}</td><td style="padding:7px 10px;border-bottom:1px solid #eee;text-align:center">${i.dur}"</td><td style="padding:7px 10px;border-bottom:1px solid #eee;text-align:right">${fmt(i.pu)}</td><td style="padding:7px 10px;border-bottom:1px solid #eee;text-align:right">${fmt(i.total)}</td></tr>`).join('');
+  const dR=desc>0?`<tr><td colspan="6" style="padding:8px 10px;color:#888">Desconto (${desc}%)</td><td style="padding:8px 10px;text-align:right;color:#e05555">-${fmt(dv)}</td></tr>`:'';
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;margin:0;padding:0;color:#222}.hdr{background:#1D9E75;padding:26px 36px 20px;color:#fff;display:flex;justify-content:space-between;align-items:center}.hdr h1{font-size:20px;font-weight:700;margin:0}.hdr p{font-size:12px;margin:4px 0 0;opacity:.85}.pill{background:rgba(255,255,255,.2);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;letter-spacing:1px;margin-bottom:8px;display:inline-block}.body{padding:22px 36px}.meta{display:flex;gap:24px;margin-bottom:18px;flex-wrap:wrap}.mi label{font-size:10px;color:#888;display:block;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}.mi span{font-size:14px;font-weight:600}table{width:100%;border-collapse:collapse;margin-bottom:14px}th{background:#f4f4f4;font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.3px;padding:7px 10px;text-align:left;border-bottom:2px solid #1D9E75}.trt td{background:#1D9E75;color:#fff;font-weight:700;font-size:13px;padding:9px 10px}.sec{font-size:12px;font-weight:600;color:#333;margin:14px 0 6px;border-left:3px solid #1D9E75;padding-left:8px;text-transform:uppercase;letter-spacing:.4px}.footer{padding:12px 36px;background:#f8f8f8;border-top:1px solid #eee;font-size:10px;color:#aaa;display:flex;justify-content:space-between}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>
+  <div class="hdr"><div><div class="pill">● GLOBOPLAY</div><h1>Proposta Comercial Amplificado</h1><p>Ampliação digital do comercial de TV no ao vivo do Globoplay</p></div><div style="text-align:right;font-size:12px;opacity:.85"><div style="font-size:10px;opacity:.7">Emitido em</div><div style="font-size:14px;font-weight:600">${data}</div></div></div>
+  <div class="body"><div class="meta"><div class="mi"><label>Anunciante</label><span>${anun}</span></div><div class="mi"><label>Período</label><span>${periodo}</span></div><div class="mi"><label>Executivo</label><span>${exec}</span></div><div class="mi"><label>Total inserções</label><span>${ins.reduce((s,i)=>s+i.qtd,0)}</span></div><div class="mi"><label>Investimento</label><span style="color:#1D9E75">${fmt(tot)}</span></div></div>
+  <div class="sec">Inserções</div><table><thead><tr><th>Programa</th><th>Dia</th><th>Gênero</th><th style="text-align:center">Qtd</th><th style="text-align:center">Dur.</th><th style="text-align:right">Unit.</th><th style="text-align:right">Total</th></tr></thead><tbody>${iR}</tbody><tfoot>${dR}<tr class="trt"><td colspan="6">Total${desc>0?' com desconto':''}</td><td style="text-align:right">${fmt(tot)}</td></tr></tfoot></table>
+  <div class="sec">Mix por Gênero</div><table style="max-width:380px"><thead><tr><th>Gênero</th><th style="text-align:right">Valor</th><th style="text-align:right">Mix</th></tr></thead><tbody>${gR}</tbody></table>
+  <p style="font-size:10px;color:#bbb;margin-top:6px">* Valores calculados com base na tabela de precificação vigente do Comercial Amplificado Nacional (NET).</p></div>
+  <div class="footer"><span>Globo Comunicações e Participações S.A. · Globoplay — Comercial Amplificado</span><span>Responsável: ${exec}</span></div></body></html>`;
+}
+window.exportPDF=p=>{const w=window.open(URL.createObjectURL(new Blob([buildPDF(p||null)],{type:'text/html'})),'_blank');if(w){setTimeout(()=>w.print(),800);addMsg('🖨️ Janela aberta. Selecione <strong>"Salvar como PDF"</strong>.');}else addMsg('⚠️ Pop-up bloqueado.');};
+
+window.exportExcel=p=>{
+  const ins=p?p.ins:S.ins,desc=p?p.desc:S.desc,anun=p?p.anun:S.anun,exec=p?p.exec:S.exec,periodo=p?p.periodo:S.periodo,data=p?p.data:new Date().toLocaleDateString('pt-BR');
+  const sub=ins.reduce((s,i)=>s+i.total,0),dv=sub*(desc/100),tot=sub-dv;
+  const byG={};ins.forEach(i=>{const g=i.pgm.genero&&i.pgm.genero!=='-'?i.pgm.genero:'Outros';byG[g]=(byG[g]||0)+i.total;});
+  const wb=XLSX.utils.book_new();
+  const wd=[['COMERCIAL AMPLIFICADO GLOBOPLAY','','','','','',''],['Anunciante:',anun,'Executivo:',exec,'','',''],['Período:',periodo,'Data:',data,'','',''],['','','','','','',''],['Programa','Dia','Gênero','Qtd','Duração','Valor Unit. (R$)','Total (R$)'],...ins.map(i=>[i.pgm.nome,i.pgm.dia,i.pgm.genero,i.qtd,i.dur+'"',i.pu,i.total]),...(desc>0?[['','','','','',`Desconto (${desc}%)`,-dv]]:[]),['','','','','','Total',tot],[],['MIX POR GÊNERO','','','','','',''],['Gênero','Total (R$)','Mix (%)','','','',''],...Object.entries(byG).sort((a,b)=>b[1]-a[1]).map(([g,v])=>[g,v,parseFloat(((v/sub)*100).toFixed(1))])];
+  const ws=XLSX.utils.aoa_to_sheet(wd);ws['!cols']=[{wch:36},{wch:12},{wch:18},{wch:8},{wch:10},{wch:20},{wch:18}];ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:6}}];
+  XLSX.utils.book_append_sheet(wb,ws,'Proposta CA');
+  const wbp=[['Código','Programa','Gênero','Dia','Horário','Preço CA 30s (R$)'],...PG.map(p=>[p.cod,p.nome,p.genero,p.dia,p.hora,p.ca])];
+  const wsp=XLSX.utils.aoa_to_sheet(wbp);wsp['!cols']=[{wch:8},{wch:36},{wch:18},{wch:12},{wch:10},{wch:20}];
+  XLSX.utils.book_append_sheet(wb,wsp,'Base de Programas');
+  XLSX.writeFile(wb,`PropCA_${anun.replace(/\s+/g,'_')}_${data.replace(/\//g,'-')}.xlsx`);
+  addMsg('✅ Excel exportado!');
+};
+
+function toggleHist(){histOpen=!histOpen;document.getElementById('hpanel').style.display=histOpen?'flex':'none';document.getElementById('harrow').textContent=histOpen?'▴':'▾';}
+function renderHist(){
+  const panel=document.getElementById('hpanel');
+  document.getElementById('hlabel').textContent=`Histórico de propostas (${proposals.length})`;
+  panel.innerHTML='';
+  if(!proposals.length){panel.innerHTML='<div style="font-size:12px;color:#888;padding:4px">Nenhuma proposta ainda.</div>';return;}
+  proposals.forEach((p,i)=>{
+    const d=document.createElement('div');d.className='hi';
+    d.innerHTML=`<div class="hi-info"><strong style="font-size:13px">${p.anun}</strong><div style="font-size:11px;color:#888">${p.periodo} · ${p.data} · ${fmt(p.tot)} · ${p.exec}</div></div>
+      <div class="hi-actions">
+        <button class="btn" style="font-size:12px;padding:5px 10px" onclick="exportPDF(proposals[${i}])">PDF</button>
+        <button class="btn" style="font-size:12px;padding:5px 10px" onclick="exportExcel(proposals[${i}])">Excel</button>
+        <button class="btn" style="font-size:12px;padding:5px 10px" onclick="copyTxt(proposals[${i}])">Copiar</button>
+      </div>`;
+    panel.appendChild(d);
+  });
+  if(proposals.length===1&&!histOpen)toggleHist();
+}
+
+function resetBot(){S={step:'executivo',exec:'',anun:'',periodo:'',ins:[],desc:0,pgm:null,qtd:1,dur:30};reviewDiv=null;closeCatalog();addMsg('Nova proposta! Qual é o seu nome?');}
+
+addMsg('Olá! Sou o assistente de precificação do <strong>Comercial Amplificado Globoplay</strong>. 👋<br><br>Para começar, qual é o seu nome?');
+</script>
+</body>
+</html>
